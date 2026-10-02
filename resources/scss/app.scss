@@ -1,17 +1,16 @@
-// Warna tema
-$primary: #1E3A8A;   // biru tua
+// ===== Variabel tema =====
+$primary: #1E3A8A;
 $secondary: #64748B;
 $success: #16A34A;
 $warning: #F59E0B;
 $body-bg: #F4F6FB;
 $border-radius: .75rem;
 $border-radius-lg: 1.25rem;
-$font-family-sans-serif: 'Plus Jakarta Sans', system-ui, sans-serif;
+$font-family-sans-serif: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
 @import "bootstrap/scss/bootstrap";
-@import "bootstrap-icons/font/bootstrap-icons.css";
 
-// Kartu bergaya Coursy: putih, membulat, bayangan lembut
+// ===== Komponen umum =====
 .card-soft {
   background: #fff;
   border: 0;
@@ -19,24 +18,63 @@ $font-family-sans-serif: 'Plus Jakarta Sans', system-ui, sans-serif;
   box-shadow: 0 10px 30px rgba(30, 58, 138, .08);
 }
 
-// Tombol pill dengan gradasi oranye
 .btn-accent {
   color: #fff;
   border: 0;
   border-radius: 50rem;
   background: linear-gradient(90deg, #F97316, #FB923C);
-  &:hover { color: #fff; filter: brightness(.95); }
+  &:hover, &:focus { color: #fff; filter: brightness(.95); }
 }
 
-// Hero biru
+.brand-badge {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: #FBBF24; color: #1E3A8A;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+.stat-icon {
+  width: 42px; height: 42px; border-radius: .9rem; font-size: 1.2rem;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+.room-cover {
+  height: 90px; border-radius: 1rem; font-size: 2rem; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #1E3A8A, #3B4FD0);
+}
+
+.welcome-card {
+  background: linear-gradient(135deg, #1E3A8A, #3B4FD0);
+  color: #fff;
+  border-radius: 1.25rem;
+}
+
+// ===== Layout dashboard =====
+.sidebar { width: 260px; background: $primary; color: #fff; }
+.sidebar-desktop { position: sticky; top: 0; height: 100vh; flex-shrink: 0; overflow-y: auto; }
+.sidebar .nav-link { color: rgba(255,255,255,.8); border-radius: .75rem; padding: .65rem .9rem; }
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active { color: #fff; background: rgba(255,255,255,.15); }
+.main-area { min-width: 0; }
+.topbar { background: #fff; box-shadow: 0 2px 12px rgba(30, 58, 138, .06); }
+
+// ===== Landing dan auth =====
 .hero {
   background: linear-gradient(135deg, #1E3A8A, #3B4FD0);
   color: #fff;
   border-radius: 0 0 2rem 2rem;
+  padding-bottom: 5rem;
 }
-
-// Sidebar dashboard
-.sidebar { width: 250px; min-height: 100vh; background: $primary; }
-.sidebar .nav-link { color: rgba(255,255,255,.8); border-radius: .75rem; }
-.sidebar .nav-link:hover,
-.sidebar .nav-link.active { color: #fff; background: rgba(255,255,255,.15); }
+.hero-underline {
+  text-decoration: underline;
+  text-decoration-color: #FBBF24;
+  text-decoration-thickness: 4px;
+  text-underline-offset: 8px;
+}
+.feature-wrap { margin-top: -3.5rem; position: relative; }
+.step-number {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: #FFF4E5; color: #F97316; font-weight: 800;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.auth-wrap { min-height: 100vh; background: linear-gradient(135deg, #1E3A8A, #3B4FD0); }
