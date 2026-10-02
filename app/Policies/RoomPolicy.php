@@ -18,4 +18,10 @@ class RoomPolicy
     {
         return $user->isSiswa() && $room->is_active && $room->hasMember($user);
     }
+
+    // Siswa anggota room boleh melihat hasil walaupun room nonaktif
+    public function view(User $user, Room $room): bool
+    {
+        return $user->isSiswa() && $room->hasMember($user);
+    }
 }

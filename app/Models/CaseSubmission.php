@@ -21,4 +21,5 @@ class CaseSubmission extends Model
     public function case()     { return $this->belongsTo(CaseStudy::class, 'case_id'); }
     public function student()  { return $this->belongsTo(User::class, 'user_id'); }
     public function feedback() { return $this->hasOne(SubmissionFeedback::class, 'submission_id'); }
+    public function assessment() { return $this->hasOne(TeacherAssessment::class, 'submission_id'); }
 }

@@ -12,5 +12,13 @@ class Video extends Model
         'youtube_url', 
         'youtube_id'
     ];
+
     public function room() { return $this->belongsTo(Room::class); }
+
+    public static function extractYoutubeId(string $url): ?string
+{
+    $pattern = '~(?:youtube\.com/(?:watch\?(?:.*&)?v=|embed/|shorts/)|youtu\.be/)([A-Za-z0-9_-]{11})~';
+
+    return preg_match($pattern, $url, $m) ? $m[1] : null;
+}
 }
