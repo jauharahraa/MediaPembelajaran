@@ -15,7 +15,9 @@ use App\Http\Controllers\Siswa\JoinRoomController;
 use App\Http\Controllers\Siswa\ResultController;
 use App\Http\Controllers\Siswa\RoomController as SiswaRoomController;
 use App\Http\Controllers\Siswa\SubmissionController as SiswaSubmissionController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+
 
 Route::view('/', 'landing')->name('landing');
 
@@ -27,6 +29,12 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
 Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(function () {
     Route::get('dashboard', [GuruDashboardController::class, 'index'])->name('dashboard');

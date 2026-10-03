@@ -17,6 +17,8 @@
         </div>
     </nav>
 
+    <div class="container">@include('partials.flash')</div>
+    
     <div class="container pt-4 pt-lg-5">
         <div class="row align-items-center g-4">
             <div class="col-lg-7">

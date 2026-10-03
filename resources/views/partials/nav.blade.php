@@ -29,3 +29,9 @@
         </a>
     @endif
 </nav>
+
+<div class="mt-auto pt-3 border-top border-light border-opacity-25">
+    <a class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}" href="{{ route('profile.edit') }}">
+        <i class="bi bi-person-circle me-2"></i>Profil Saya
+    </a>
+</div>
