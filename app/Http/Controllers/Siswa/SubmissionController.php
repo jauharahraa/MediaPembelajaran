@@ -40,8 +40,8 @@ class SubmissionController extends Controller
 
         // Diperbarui menggunakan route 'siswa.rooms.cases.show' sesuai routes/web.php
         return redirect()
-            ->route('siswa.rooms.cases.show', ['room' => $case->room_id, 'case' => $case->id])
-            ->with('success', 'Jawaban berhasil dikirim.');
+    ->route('siswa.rooms.cases.show', ['room' => $case->room_id, 'case' => $case->id])
+    ->with('success', 'Jawaban berhasil dikirim.');
     }
 
     // Mengulang permintaan feedback tanpa membuat jawaban baru dan tanpa mengurangi jatah revisi

@@ -48,6 +48,13 @@
         <div class="d-flex justify-content-between align-items-center py-2 border-top gap-2">
             <div class="fw-semibold">{{ $material->title }}
                 @if ($material->image_path)<i class="bi bi-image text-muted ms-1" title="Ada gambar"></i>@endif
+                @if ($material->content)<span class="badge text-bg-light ms-1">Teks</span>@endif
+                @if ($material->hasFile())
+                    <a href="{{ route('materials.file', ['material' => $material, 'download' => 1]) }}"
+                    class="ms-2 small text-decoration-none" title="Unduh {{ $material->file_name }}">
+                        <i class="bi {{ $material->fileIcon() }}"></i> {{ $material->fileTypeLabel() }}
+                    </a>
+                @endif
             </div>
             <div class="d-flex gap-1">
                 <a href="{{ route('guru.rooms.materials.edit', [$room, $material]) }}" class="btn btn-sm btn-outline-primary rounded-pill" title="Edit"><i class="bi bi-pencil"></i></a>

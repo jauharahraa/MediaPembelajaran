@@ -88,3 +88,11 @@ html.sidebar-collapsed .sidebar-desktop {
   display: inline-flex; align-items: center; justify-content: center;
 }
 .auth-wrap { min-height: 100vh; background: linear-gradient(135deg, #1E3A8A, #3B4FD0); }
+
+.material-content {
+  line-height: 1.75;
+  h2, h3 { font-weight: 700; margin-top: 1.25rem; }
+  blockquote { border-left: 4px solid #CBD5E1; padding-left: 1rem; color: $secondary; }
+  pre { background: #0F172A; color: #E2E8F0; padding: 1rem; border-radius: .75rem; overflow-x: auto; }
+  a { word-break: break-word; }
+}
