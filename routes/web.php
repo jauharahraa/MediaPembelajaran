@@ -11,13 +11,13 @@ use App\Http\Controllers\Guru\SubmissionController as GuruSubmissionController;
 use App\Http\Controllers\Guru\VideoController;
 use App\Http\Controllers\MaterialFileController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Siswa\CaseController as SiswaCaseController;
 use App\Http\Controllers\Siswa\DashboardController as SiswaDashboardController;
 use App\Http\Controllers\Siswa\JoinRoomController;
 use App\Http\Controllers\Siswa\ResultController;
 use App\Http\Controllers\Siswa\RoomController as SiswaRoomController;
 use App\Http\Controllers\Siswa\SubmissionController as SiswaSubmissionController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Siswa\QuizController;
 
 Route::view('/', 'landing')->name('landing');
 
@@ -52,10 +52,10 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     Route::post('rooms/{room}/cases/reorder', [CaseController::class, 'reorder'])->name('rooms.cases.reorder');
     Route::resource('rooms.cases', CaseController::class)->except(['index'])->parameters(['cases' => 'case']);
 
-    // Penilaian guru
+       // Penilaian guru: satu halaman per siswa per room
     Route::get('submissions', [GuruSubmissionController::class, 'index'])->name('submissions.index');
-    Route::get('submissions/{case}/{student}', [GuruSubmissionController::class, 'show'])->name('submissions.show');
-    Route::post('submissions/{case}/{student}/assess', [AssessmentController::class, 'store'])->name('submissions.assess');
+    Route::get('submissions/{room}/{student}', [GuruSubmissionController::class, 'show'])->name('submissions.show');
+    Route::post('submissions/{room}/{student}/assess', [AssessmentController::class, 'store'])->name('submissions.assess');
 });
 
 Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {
@@ -66,11 +66,12 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
 
     Route::get('rooms', [SiswaRoomController::class, 'index'])->name('rooms.index');
     Route::get('rooms/{room}', [SiswaRoomController::class, 'show'])->name('rooms.show');
-    Route::get('rooms/{room}/cases/{case}', [SiswaCaseController::class, 'show'])->name('rooms.cases.show');
 
-    Route::post('cases/{case}/submit', [SiswaSubmissionController::class, 'store'])->name('cases.submit');
+    // Semua kasus dalam satu room digabung menjadi satu halaman kuis
+    Route::get('rooms/{room}/quiz', [QuizController::class, 'show'])->name('rooms.quiz');
+    Route::post('rooms/{room}/quiz', [QuizController::class, 'store'])->name('rooms.quiz.submit');
+
     Route::post('submissions/{submission}/retry-feedback', [SiswaSubmissionController::class, 'retryFeedback'])->name('submissions.retry');
 
     Route::get('rooms/{room}/results', [ResultController::class, 'index'])->name('rooms.results.index');
-    Route::get('rooms/{room}/results/{case}', [ResultController::class, 'show'])->name('rooms.results.show');
 });

@@ -123,30 +123,30 @@
             @endforelse
         </div>
 
-        {{-- Kuis --}}
+         {{-- Kuis --}}
         <div class="tab-pane fade" id="kuis" role="tabpanel">
-            @forelse ($caseRows as $row)
-                <a href="{{ route('siswa.rooms.cases.show', [$room, $row['case']]) }}"
-                   class="card-soft p-3 mb-3 d-block text-decoration-none text-body">
-                    <div class="d-flex gap-3">
-                        <span class="step-number flex-shrink-0">{{ $loop->iteration }}</span>
-                        <div class="flex-grow-1">
-                            <div class="fw-bold">{{ $row['case']->title }}</div>
-                            <p class="text-muted small mb-2">{{ \Illuminate\Support\Str::limit($row['case']->narrative, 140) }}</p>
-                            <div class="d-flex flex-wrap gap-2">
-                                @include('partials.status-badge', ['status' => $row['status']])
-                                <span class="badge {{ $row['fbClass'] }}">Feedback AI: {{ $row['fbLabel'] }}</span>
-                                <span class="badge {{ $row['graded'] ? 'text-bg-success' : 'text-bg-secondary' }}">
-                                    Penilaian guru: {{ $row['graded'] ? 'Sudah' : 'Belum' }}
-                                </span>
-                            </div>
+            @if ($quiz['total'] === 0)
+                <div class="card-soft p-4 text-muted">Guru belum membuat soal kuis.</div>
+            @else
+                <div class="card-soft p-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                        <div>
+                            <h2 class="h5 fw-bold mb-1">Kuis Case Method</h2>
+                            <p class="text-muted mb-2">{{ $quiz['total'] }} soal · dikerjakan {{ $quiz['answered'] }} dari {{ $quiz['total'] }}</p>
+                            @include('partials.status-badge', ['status' => $quiz['status']])
                         </div>
-                        <i class="bi bi-chevron-right align-self-center text-muted"></i>
+                        <a href="{{ route('siswa.rooms.quiz', $room) }}" class="btn btn-accent px-4">
+                            {{ $quiz['answered'] === 0 ? 'Mulai Kuis' : 'Buka Kuis' }}
+                        </a>
                     </div>
-                </a>
-            @empty
-                <div class="card-soft p-4 text-muted">Guru belum membuat kasus.</div>
-            @endforelse
+                    <hr>
+                    <ol class="mb-0">
+                        @foreach ($quiz['items'] as $item)
+                            <li>{{ $item['case']->title }}</li>
+                        @endforeach
+                    </ol>
+                </div>
+            @endif
         </div>
     @endunless
 

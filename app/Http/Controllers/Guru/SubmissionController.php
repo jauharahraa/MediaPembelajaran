@@ -3,52 +3,71 @@
 namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
-use App\Models\CaseStudy;
-use App\Models\CaseSubmission;
+use App\Models\Room;
 use App\Models\User;
+use App\Services\QuizService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class SubmissionController extends Controller
 {
+    // Satu baris = satu siswa pada satu room (satu kuis)
     public function index(Request $request)
     {
         $teacher = $request->user();
 
-        // Hanya jawaban terakhir tiap siswa per kasus, dari room milik guru ini
-        $latestIds = CaseSubmission::query()
-            ->whereHas('case.room', fn ($q) => $q->where('teacher_id', $teacher->id))
-            ->selectRaw('MAX(case_submissions.id)')
-            ->groupBy('case_id', 'user_id');
-
-        $submissions = CaseSubmission::with(['student', 'case.room', 'assessment'])
-            ->whereIn('id', $latestIds)
-            ->when($request->room_id, fn ($q, $v) => $q->whereHas('case', fn ($c) => $c->where('room_id', $v)))
-            ->when($request->case_id, fn ($q, $v) => $q->where('case_id', $v))
-            ->when($request->status === 'belum', fn ($q) => $q->doesntHave('assessment'))
-            ->when($request->status === 'sudah', fn ($q) => $q->has('assessment'))
-            ->when($request->q, fn ($q, $v) => $q->whereHas('student', fn ($s) => $s->where('name', 'like', "%{$v}%")))
-            ->latest('submitted_at')
+        $rows = DB::table('case_submissions as cs')
+            ->join('cases as c', 'c.id', '=', 'cs.case_id')
+            ->join('rooms as r', 'r.id', '=', 'c.room_id')
+            ->join('users as u', 'u.id', '=', 'cs.user_id')
+            ->where('r.teacher_id', $teacher->id) // hanya room milik guru ini
+            ->when($request->room_id, fn ($q, $v) => $q->where('r.id', $v))
+            ->when($request->q, fn ($q, $v) => $q->where('u.name', 'like', '%' . $v . '%'))
+            ->groupBy('r.id', 'r.name', 'u.id', 'u.name', 'u.kelas')
+            ->selectRaw('
+                r.id as room_id, r.name as room_name,
+                u.id as student_id, u.name as student_name, u.kelas,
+                COUNT(DISTINCT cs.case_id) as answered,
+                MAX(cs.attempt_number) as attempts,
+                MAX(cs.submitted_at) as last_submitted_at,
+                (SELECT COUNT(*) FROM cases c2 WHERE c2.room_id = r.id) as total_cases,
+                (SELECT COUNT(*) FROM teacher_assessments ta JOIN cases c3 ON c3.id = ta.case_id
+                    WHERE c3.room_id = r.id AND ta.user_id = u.id) as graded,
+                (SELECT AVG(ta2.final_score) FROM teacher_assessments ta2 JOIN cases c4 ON c4.id = ta2.case_id
+                    WHERE c4.room_id = r.id AND ta2.user_id = u.id) as avg_score
+            ')
+            ->when($request->status === 'sudah', fn ($q) => $q->havingRaw('graded >= total_cases'))
+            ->when($request->status === 'belum', fn ($q) => $q->havingRaw('graded < total_cases'))
+            ->orderByDesc('last_submitted_at')
             ->paginate(15)
             ->withQueryString();
 
-        // attempt_number pada jawaban terakhir = jumlah percobaan siswa
-        $rooms = $teacher->rooms()->with('cases')->get();
+        $rows->through(function ($row) {
+            $row->complete = $row->total_cases > 0 && $row->graded >= $row->total_cases;
+            $row->last_submitted_at = Carbon::parse($row->last_submitted_at);
 
-        return view('guru.submissions.index', compact('submissions', 'rooms'));
+            return $row;
+        });
+
+        $rooms = $teacher->rooms()->orderBy('name')->get();
+
+        return view('guru.submissions.index', compact('rows', 'rooms'));
     }
 
-    public function show(CaseStudy $case, User $student)
+    public function show(Room $room, User $student, QuizService $quizService)
     {
-        Gate::authorize('manage', $case);
+        Gate::authorize('manage', $room); // guru hanya boleh memeriksa room miliknya
+        abort_unless($student->isSiswa() && $room->hasMember($student), 404);
 
-        $submissions = $case->submissions()->where('user_id', $student->id)
-            ->with('feedback')->orderBy('attempt_number')->get();
-        abort_if($submissions->isEmpty(), 404);
+        $quiz = $quizService->build($room, $student);
+        abort_if($quiz['answered'] === 0, 404);
 
-        $case->load('rubric', 'room');
-        $assessment = $case->assessments()->where('user_id', $student->id)->first();
+        $awaitingRevision = $quiz['items']->contains(
+            fn ($i) => in_array($i['mode'], ['revisi', 'menunggu_feedback'], true)
+        );
 
-        return view('guru.submissions.show', compact('case', 'student', 'submissions', 'assessment'));
+        return view('guru.submissions.show', compact('room', 'student', 'quiz', 'awaitingRevision'));
     }
 }

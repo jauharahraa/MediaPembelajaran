@@ -54,7 +54,7 @@
                         <td class="text-nowrap">{{ $sub->submitted_at->translatedFormat('d M Y, H:i') }}</td>
                         <td class="text-end">
                             <a class="btn btn-sm btn-outline-primary rounded-pill"
-                               href="{{ route('guru.submissions.show', [$sub->case_id, $sub->user_id]) }}">Lihat</a>
+                               href="{{ route('guru.submissions.show', [$sub->case->room_id, $sub->user_id]) }}">Lihat</a>
                         </td>
                     </tr>
                 @endforeach
