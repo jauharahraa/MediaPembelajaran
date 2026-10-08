@@ -76,6 +76,7 @@ class QuizService
             'graded'      => $graded,
             'complete'    => $complete,
             'finalScore'  => $finalScore,
+            'feedbackIssues' => $items->filter(fn ($i) => $i['latest'] && $i['latest']->feedback?->status !== 'success')->count(),
             'hasEditable' => $items->contains(fn ($i) => $i['editable']),
             'status'      => $status,
         ];

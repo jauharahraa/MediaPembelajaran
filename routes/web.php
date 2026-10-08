@@ -71,7 +71,11 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
     Route::get('rooms/{room}/quiz', [QuizController::class, 'show'])->name('rooms.quiz');
     Route::post('rooms/{room}/quiz', [QuizController::class, 'store'])->name('rooms.quiz.submit');
 
-    Route::post('submissions/{submission}/retry-feedback', [SiswaSubmissionController::class, 'retryFeedback'])->name('submissions.retry');
+    Route::post('rooms/{room}/quiz/retry-feedback', [QuizController::class, 'retryFeedback'])
+        ->middleware('throttle:10,1')->name('rooms.quiz.retry');
 
+    Route::post('submissions/{submission}/retry-feedback', [SiswaSubmissionController::class, 'retryFeedback'])
+        ->middleware('throttle:10,1')->name('submissions.retry');
+        
     Route::get('rooms/{room}/results', [ResultController::class, 'index'])->name('rooms.results.index');
 });

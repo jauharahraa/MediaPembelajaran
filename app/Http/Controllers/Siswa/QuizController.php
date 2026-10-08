@@ -13,7 +13,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Throwable;
 
 class QuizController extends Controller
 {
@@ -83,15 +82,43 @@ class QuizController extends Controller
             return back()->withErrors(['jawaban' => $e->getMessage()])->withInput();
         }
 
-        // Gemini dipanggil SETELAH semua jawaban tersimpan. Kegagalan tidak menghapus jawaban.
-        foreach ($created as $submission) {
-            try {
-                $gemini->generateFeedback($submission);
-            } catch (Throwable $e) {
-                report($e);
-            }
+        // Jawaban sudah tersimpan (commit) SEBELUM Gemini dipanggil, jadi kegagalan API tidak menghapus jawaban
+        $success = $gemini->generateMany($created);
+
+        $redirect = redirect()->route('siswa.rooms.quiz', $room)->with('success', 'Jawaban berhasil dikirim.');
+
+        if ($success < count($created)) {
+            $redirect->with('error', 'Sebagian feedback AI belum tersedia. Jawaban Anda aman. Gunakan tombol "Minta Feedback yang Belum Ada" di bawah.');
         }
 
-        return redirect()->route('siswa.rooms.quiz', $room)->with('success', 'Jawaban berhasil dikirim.');
+        return $redirect;
+    }
+
+    // Meminta ulang semua feedback yang belum berhasil, tanpa membuat jawaban baru
+    public function retryFeedback(Request $request, Room $room, GeminiService $gemini)
+    {
+        Gate::authorize('view', $room);
+
+        $pending = CaseSubmission::with('feedback')
+            ->where('user_id', $request->user()->id)
+            ->whereIn('case_id', $room->cases()->pluck('id'))
+            ->orderBy('attempt_number')
+            ->get()
+            ->groupBy('case_id')
+            ->map(fn ($group) => $group->last())                    // jawaban terakhir tiap soal
+            ->filter(fn ($submission) => $submission->feedback?->status !== 'success')
+            ->values();
+
+        if ($pending->isEmpty()) {
+            return back()->with('success', 'Semua feedback sudah tersedia.');
+        }
+
+        $success = $gemini->generateMany($pending);
+
+        if ($success === $pending->count()) {
+            return back()->with('success', 'Feedback AI berhasil dibuat.');
+        }
+
+        return back()->with('error', "{$success} dari {$pending->count()} feedback berhasil dibuat. Lihat alasan pada masing-masing soal, lalu coba lagi.");
     }
 }

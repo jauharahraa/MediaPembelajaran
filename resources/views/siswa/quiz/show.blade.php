@@ -54,11 +54,24 @@
 @error('jawaban')
     <div class="alert alert-danger border-0 rounded-4 shadow-sm"><i class="bi bi-exclamation-triangle me-2"></i>{{ $message }}</div>
 @enderror
+
 @error('feedback')
     <div class="alert alert-danger border-0 rounded-4 shadow-sm"><i class="bi bi-exclamation-triangle me-2"></i>{{ $message }}</div>
 @enderror
+
 @if ($errors->has('answers') || $errors->has('answers.*'))
     <div class="alert alert-danger border-0 rounded-4 shadow-sm">Ada jawaban yang belum lengkap. Periksa kolom yang bertanda merah.</div>
+@endif
+
+@if ($quiz['feedbackIssues'] > 0)
+    <div class="alert alert-warning border-0 rounded-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span><i class="bi bi-stars me-2"></i>{{ $quiz['feedbackIssues'] }} feedback AI belum tersedia. Jawaban Anda aman dan jatah revisi tidak berkurang.</span>
+        <form method="POST" action="{{ route('siswa.rooms.quiz.retry', $room) }}"
+              onsubmit="const b = this.querySelector('button'); b.disabled = true; b.textContent = 'Memproses...';">
+            @csrf
+            <button class="btn btn-sm btn-dark rounded-pill"><i class="bi bi-arrow-repeat me-1"></i>Minta Feedback yang Belum Ada</button>
+        </form>
+    </div>
 @endif
 
 @if ($quiz['total'] === 0)
@@ -168,6 +181,7 @@
                             @endif
                         </div>
                         <div id="preview-body"></div>
+                        <p class="small text-muted mt-2 mb-0">Setelah dikirim, AI membuat feedback untuk setiap soal. Prosesnya bisa sampai 1 menit, jadi jangan tutup halaman.</p>
                     </div>
                     <div class="modal-footer border-0">
                         <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Kembali Periksa</button>

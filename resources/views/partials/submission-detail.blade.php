@@ -22,23 +22,27 @@
                 <div style="white-space: pre-line;">{{ $sub->feedback->{'feedback_' . $key} }}</div>
             </div>
         @endforeach
-    @else
-        <div class="alert alert-{{ $sub->feedback?->status === 'failed' ? 'warning' : 'info' }} border-0 rounded-4 mb-0">
-            <p class="mb-2">
-                @if ($sub->feedback?->status === 'failed')
-                    Feedback AI belum berhasil dibuat. Jawaban Anda tetap tersimpan dan jatah revisi tidak berkurang.
-                @else
-                    Feedback AI belum tersedia.
+        @else
+            <div class="alert alert-{{ $sub->feedback?->status === 'failed' ? 'warning' : 'info' }} border-0 rounded-4 mb-0">
+                <p class="mb-1">
+                    @if ($sub->feedback?->status === 'failed')
+                        Feedback AI belum berhasil dibuat. Jawaban Anda tetap tersimpan dan jatah revisi tidak berkurang.
+                    @else
+                        Feedback AI belum tersedia.
+                    @endif
+                </p>
+                @if ($sub->feedback?->error_message)
+                    <p class="small mb-2"><i class="bi bi-info-circle me-1"></i>{{ $sub->feedback->error_message }}</p>
                 @endif
-            </p>
-            @if ($allowRetry ?? false)
-                <button type="submit" form="retry-{{ $sub->id }}" class="btn btn-sm btn-outline-dark rounded-pill">
-                    <i class="bi bi-arrow-repeat me-1"></i>Coba Minta Feedback Lagi
-                </button>
-                @push('forms')
-                    <form id="retry-{{ $sub->id }}" method="POST" action="{{ route('siswa.submissions.retry', $sub) }}">@csrf</form>
-                @endpush
-            @endif
-        </div>
-    @endif
+                @if ($allowRetry ?? false)
+                    <button type="submit" form="retry-{{ $sub->id }}" class="btn btn-sm btn-outline-dark rounded-pill">
+                        <i class="bi bi-arrow-repeat me-1"></i>Coba Minta Feedback Lagi
+                    </button>
+                    @push('forms')
+                        <form id="retry-{{ $sub->id }}" method="POST" action="{{ route('siswa.submissions.retry', $sub) }}">@csrf</form>
+                    @endpush
+                @endif
+            </div>
+        @endif
+    </div>
 </div>
